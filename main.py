@@ -1,3 +1,4 @@
+import uuid
 from typing import Final
 
 # pip install python-telegram-bot
