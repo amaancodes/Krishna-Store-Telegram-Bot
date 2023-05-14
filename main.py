@@ -7,8 +7,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 print('Starting up bot...')
 
-TOKEN: Final = '5875190732:AAH8eH9qfd661Wx4Z0TYUaLBDeOSp7b5s4'
-BOT_USERNAME: Final = '@Krishna_Stores_bot'
+TOKEN: Final = 'token'
+BOT_USERNAME: Final = '@botname'
 
 orders = []
 affiliates = {}
