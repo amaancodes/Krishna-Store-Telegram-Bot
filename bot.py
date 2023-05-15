@@ -1,6 +1,8 @@
 import logging
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -9,10 +11,18 @@ logger = logging.getLogger(__name__)
 
 # Global variables to store product data and user orders
 products = {
-    'Apple': 1.0,
-    'Banana': 0.5,
-    'Orange': 0.75,
-    'Mango': 1.5
+    'Wheat': '50/kg',
+    'Rice': '30/kg',
+    'Oil': '120/kg',
+    'Bread': '25/loaf',
+    'Milk': '50/litre',
+    'Eggs': '6/piece',
+    'Bread': '25/loaf',
+    'Sugar': '30/kg',
+    'ParleG': '10/piece',
+    'Nirma': '52/kg',
+    'Salt': '20/kg',
+    'Tea': '110/kg'
 }
 orders = {}
 affiliates = {}
@@ -31,7 +41,7 @@ def start(update, context):
 
 # View products command
 def view_products(update, context):
-    products_list = "\n".join([f"{product} - ${price}" for product, price in products.items()])
+    products_list = "\n".join([f"{product} - Rs{price}" for product, price in products.items()])
     update.message.reply_text(f"Available products:\n{products_list}")
 
 # Order conversation
@@ -68,21 +78,30 @@ def order(update, context):
 def order_done(update, context):
     total_amount = 0
     order_details = ""
-    
+
     if update.message.from_user.id in orders:
-        for product_name, quantity in orders[update.message.from_user.id].items():
+        user_id = update.message.from_user.id
+        user_name = update.message.from_user.username
+        for product_name, quantity in orders[user_id].items():
             price = products[product_name]
             amount = price * quantity
             total_amount += amount
-            order_details += f"{product_name} x{quantity} - ${amount}\n"
-        
-        if total_amount > 0:
-            update.message.reply_text(f"Order details:\n{order_details}\nTotal amount: ${total_amount}")
+            order_details += f"{product_name} x{quantity} - Rs{amount}\n"
+
+        if order_details:
+            order_details += f"\nTotal amount: Rs{total_amount}"
+            update.message.reply_text(f"Order details:\n{order_details}\n\nThank you for your order!")
+
+            # Send order details to the user
+            context.bot.send_message(
+                chat_id=user_id,
+                text=f"Order details:\n{order_details}\n\nThank you for your order, {user_name}!"
+            )
         else:
             update.message.reply_text("Your order is empty.")
     else:
         update.message.reply_text("Your order is empty.")
-    
+
     return ConversationHandler.END
 
 def view_order(update, context):
@@ -94,10 +113,10 @@ def view_order(update, context):
             price = products[product_name]
             amount = price * quantity
             total_amount += amount
-            order_details += f"{product_name} x{quantity} - ${amount}\n"
+            order_details += f"{product_name} x{quantity} - Rs{amount}\n"
 
         if order_details:
-            order_details += f"\nTotal amount: ${total_amount}"
+            order_details += f"\nTotal amount: Rs{total_amount}"
             update.message.reply_text(f"Your order:\n{order_details}")
         else:
             update.message.reply_text("Your order is empty.")
